@@ -1,0 +1,18 @@
+{
+  "name": "obec-curriculum-indicators",
+  "version": "1.0.0",
+  "description": "Thai Basic Education Core Curriculum (OBEC) Standard Indicators in JSON format (ฉบับปรับปรุง 2560 & ระหว่างทาง-ปลายทาง 2566)",
+  "main": "data/all-indicators.json",
+  "keywords": [
+    "obec",
+    "thai-curriculum",
+    "curriculum",
+    "indicators",
+    "สพฐ",
+    "ตัวชี้วัด",
+    "ตัวชี้วัดระหว่างทาง",
+    "ตัวชี้วัดปลายทาง"
+  ],
+  "author": "allstartech999",
+  "license": "MIT"
+}
