@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Thai Basic Education Core Curriculum (OBEC) Standard Indicators in JSON format (ฉบับปรับปรุง 2560 & ระหว่างทาง-ปลายทาง 2566)",
   "main": "data/all-indicators.json",
+  "scripts": {
+    "build": "node scripts/build-all.js",
+    "build:social": "node scripts/build-social.js"
+  },
   "keywords": [
     "obec",
     "thai-curriculum",
