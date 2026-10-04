@@ -6,6 +6,8 @@
   "scripts": {
     "build": "node scripts/build-all.js",
     "audit": "node scripts/audit-all.js",
+    "deep-audit": "node scripts/deep-audit.js",
+    "clean": "node scripts/clean-indicators.js",
     "build:social": "node scripts/build-social.js"
   },
   "keywords": [
