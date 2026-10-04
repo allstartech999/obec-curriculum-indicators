@@ -28,11 +28,14 @@ function groupIntoLines(items) {
 }
 
 const STRAND_MAP = {
-  'ท 1.1': 'สาระที่ 1 การอ่าน',
-  'ท 2.1': 'สาระที่ 2 การเขียน',
-  'ท 3.1': 'สาระที่ 3 การฟัง การดู และการพูด',
-  'ท 4.1': 'สาระที่ 4 หลักการใช้ภาษาไทย',
-  'ท 5.1': 'สาระที่ 5 วรรณคดีและวรรณกรรม'
+  'ต 1.1': 'สาระที่ 1 ภาษาเพื่อการสื่อสาร',
+  'ต 1.2': 'สาระที่ 1 ภาษาเพื่อการสื่อสาร',
+  'ต 1.3': 'สาระที่ 1 ภาษาเพื่อการสื่อสาร',
+  'ต 2.1': 'สาระที่ 2 ภาษาและวัฒนธรรม',
+  'ต 2.2': 'สาระที่ 2 ภาษาและวัฒนธรรม',
+  'ต 3.1': 'สาระที่ 3 ภาษากับความสัมพันธ์กับกลุ่มสาระการเรียนรู้อื่น',
+  'ต 4.1': 'สาระที่ 4 ภาษากับความสัมพันธ์กับชุมชนและโลก',
+  'ต 4.2': 'สาระที่ 4 ภาษากับความสัมพันธ์กับชุมชนและโลก'
 };
 
 const boilerplatePrefixes = [
@@ -41,7 +44,7 @@ const boilerplatePrefixes = [
   'กลุ่มที่',
   'ตัวชี้วัด',
   'หมายเหตุ',
-  'ชั้นประถมศึกษา',
+  'ชั้นมัธยมศึกษา',
   'รวม ',
   'ตามหลักสูตรแกนกลาง'
 ];
@@ -52,7 +55,7 @@ function isBoilerplateLine(line) {
   for (const p of boilerplatePrefixes) {
     if (trimmed.startsWith(p)) return true;
   }
-  if (trimmed.startsWith('ใช้กระบวนการ') || trimmed.startsWith('เข้าใจธรรมชาติ') || trimmed.startsWith('รู้และเข้าใจ')) return true;
+  if (trimmed.startsWith('เข้าใจและตีความ') || trimmed.startsWith('มีทักษะการสื่อสาร') || trimmed.startsWith('รู้และเข้าใจ')) return true;
   return false;
 }
 
@@ -60,9 +63,9 @@ function cleanLine(l) {
   return l
     .replace(/๐/g, '0').replace(/๑/g, '1').replace(/๒/g, '2').replace(/๓/g, '3').replace(/๔/g, '4')
     .replace(/๕/g, '5').replace(/๖/g, '6').replace(/๗/g, '7').replace(/๘/g, '8').replace(/๙/g, '9')
-    .replace(/ท\s*(\d)\s*\.\s*(\d)/g, 'ท $1.$2')
-    .replace(/ป\s*\.?\s*([0-9]+)\s*\/\s*([0-9]+)/g, 'ป.$1/$2')
-    .replace(/ป\s*\.?\s*([0-9]+)/g, 'ป.$1')
+    .replace(/ต\s*\.?\s*(\d)\s*\.\s*(\d)/g, 'ต $1.$2')
+    .replace(/ม\s*\.?\s*([0-9]+)\s*\/\s*([0-9]+)/g, 'ม.$1/$2')
+    .replace(/ม\s*\.?\s*([0-9]+)/g, 'ม.$1')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -70,67 +73,54 @@ function cleanLine(l) {
 function normalizeCode(raw, currentStandard, gradeLevel) {
   let cleaned = raw
     .replace(/^\*\s*/, '')
-    .replace(/ป\s*\.?\s*([0-9]+)\s*\/\s*([0-9]+)/g, 'ป.$1/$2')
+    .replace(/ม\s*\.?\s*([0-9]+)\s*\/\s*([0-9]+)/g, 'ม.$1/$2')
     .replace(/\s+/g, ' ')
     .trim();
 
-  if (gradeLevel && cleaned.includes('ป.')) {
-    cleaned = cleaned.replace(/ป\.\d+\//, `${gradeLevel}/`);
-  }
-
-  // If starts with "ท 1.1 ป.1/1"
-  if (/^ท\s*\d\.\d\s+ป\.\d+\/\d+/.test(cleaned)) {
+  // If starts with "ต 1.1 ม.1/1"
+  if (/^ต\s*\d\.\d\s+ม\.\d+\/\d+/.test(cleaned)) {
     return cleaned.replace(/\s+/g, ' ');
   }
 
-  // If starts with "ท 1 ป.1/1"
-  if (/^ท\s*(\d)\s+ป\.\d+\/\d+/.test(cleaned)) {
-    const num = cleaned.match(/^ท\s*(\d)\s+ป/)[1];
-    if (currentStandard && currentStandard.startsWith(`ท ${num}.`)) {
-      cleaned = cleaned.replace(/^ท\s*\d\s+/, currentStandard + ' ');
+  // If starts with "ต 1 ม.1/1"
+  if (/^ต\s*(\d)\s+ม\.\d+\/\d+/.test(cleaned)) {
+    const num = cleaned.match(/^ต\s*(\d)\s+ม/)[1];
+    if (currentStandard && currentStandard.startsWith(`ต ${num}.`)) {
+      cleaned = cleaned.replace(/^ต\s*\d\s+/, currentStandard + ' ');
     } else {
-      cleaned = cleaned.replace(/^ท\s*\d\s+/, `ท ${num}.1 `);
+      cleaned = cleaned.replace(/^ต\s*\d\s+/, `ต ${num}.1 `);
     }
   }
 
-  // If starts with "ท ป.1/1"
-  if (/^ท\s+ป\.\d+\/\d+/.test(cleaned)) {
-    cleaned = cleaned.replace(/^ท\s+/, currentStandard + ' ');
+  // If starts with "ต ม.1/1"
+  if (/^ต\s+ม\.\d+\/\d+/.test(cleaned)) {
+    cleaned = cleaned.replace(/^ต\s+/, currentStandard + ' ');
   }
 
-  if (!/^ท\s*\d\.\d/.test(cleaned)) {
-    if (/^\d\.\d\s+ป\./.test(cleaned)) {
-      cleaned = 'ท ' + cleaned;
-    } else if (cleaned.startsWith('ป.')) {
+  if (!/^ต\s*\d\.\d/.test(cleaned)) {
+    if (/^\d\.\d\s+ม\./.test(cleaned)) {
+      cleaned = 'ต ' + cleaned;
+    } else if (cleaned.startsWith('ม.')) {
       cleaned = currentStandard + ' ' + cleaned;
     }
-  }
-
-  if (gradeLevel && cleaned.includes('ป.')) {
-    cleaned = cleaned.replace(/ป\.\d+\//, `${gradeLevel}/`);
   }
 
   return cleaned.replace(/\s+/g, ' ');
 }
 
-async function buildThaiPrimary() {
-  const pdfPath = 'C:\\Users\\m1022\\.gemini\\antigravity\\brain\\0b478ce6-9eee-42b3-a850-986436680a7e\\.tempmediaStorage\\bf76c9c33c7b1b15.pdf';
+async function testEnglishSecondary() {
+  const pdfPath = 'C:\\Users\\m1022\\.gemini\\antigravity\\brain\\0b478ce6-9eee-42b3-a850-986436680a7e\\.tempmediaStorage\\4f16994ffe8153f4.pdf';
   const parser = new PDFParse({ data: fs.readFileSync(pdfPath) });
   await parser.load();
 
   const configs = [
-    { grade: 'ป.1', file: 'thai-p1.json', pages: [3, 4], targetTotal: 22, targetBetween: 13, targetFinal: 9 },
-    { grade: 'ป.2', file: 'thai-p2.json', pages: [5, 6], targetTotal: 27, targetBetween: 18, targetFinal: 9 },
-    { grade: 'ป.3', file: 'thai-p3.json', pages: [7, 8, 9], targetTotal: 31, targetBetween: 23, targetFinal: 8 },
-    { grade: 'ป.4', file: 'thai-p4.json', pages: [10, 11, 12], targetTotal: 33, targetBetween: 26, targetFinal: 7 },
-    { grade: 'ป.5', file: 'thai-p5.json', pages: [13, 14, 15], targetTotal: 33, targetBetween: 24, targetFinal: 9 },
-    { grade: 'ป.6', file: 'thai-p6.json', pages: [16, 17, 18], targetTotal: 34, targetBetween: 22, targetFinal: 12 }
+    { grade: 'ม.1', file: 'english-m1.json', pages: [18, 19, 20], targetTotal: 20, targetBetween: 16, targetFinal: 4 },
+    { grade: 'ม.2', file: 'english-m2.json', pages: [21, 22, 23], targetTotal: 21, targetBetween: 17, targetFinal: 4 },
+    { grade: 'ม.3', file: 'english-m3.json', pages: [24, 25, 26], targetTotal: 21, targetBetween: 17, targetFinal: 4 }
   ];
 
-  const outDir = path.join(__dirname, '..', 'data');
-
   for (const cfg of configs) {
-    let currentStandard = 'ท 1.1';
+    let currentStandard = 'ต 1.1';
     const indicatorsMap = new Map();
 
     for (const p of cfg.pages) {
@@ -157,8 +147,7 @@ async function buildThaiPrimary() {
           line = line.trim();
           if (!line) continue;
 
-          // Check standard header
-          const stdMatch = line.match(/มาตรฐาน\s*(ท\s*\d\.\d)/);
+          const stdMatch = line.match(/มาตรฐาน\s*(ต\s*\d\.\d)/);
           if (stdMatch) {
             currentStandard = stdMatch[1].replace(/\s+/g, ' ');
             continue;
@@ -168,11 +157,9 @@ async function buildThaiPrimary() {
             continue;
           }
 
-          // Strip leading group number
           line = line.replace(/^[0-9]+\s+/, '');
 
-          // Regex matching indicator code at start of line
-          const codeMatch = line.match(/^(\*?\s*(?:ท(?:\s*\d(?:\.\d)?)?\s+)?(?:ป\.\s*[0-9]+\/[0-9]+|\d\.\d\s+ป\.\s*[0-9]+\/[0-9]+))/);
+          const codeMatch = line.match(/^(\*?\s*(?:ต(?:\s*\d(?:\.\d)?)?\s+)?(?:ม\.\s*[0-9]+\/[0-9]+|\d\.\d\s+ม\.\s*[0-9]+\/[0-9]+))/);
 
           if (codeMatch) {
             if (currentItem) {
@@ -182,16 +169,16 @@ async function buildThaiPrimary() {
                   code: currentItem.code,
                   name: fullText,
                   type: currentItem.type,
-                  subjectArea: 'ภาษาไทย',
+                  subjectArea: 'ภาษาต่างประเทศ',
                   gradeLevel: cfg.grade,
-                  strand: STRAND_MAP[currentItem.std] || 'ภาษาไทย'
+                  strand: STRAND_MAP[currentItem.std] || 'ภาษาต่างประเทศ'
                 });
               }
             }
 
             const rawCode = codeMatch[0];
             let normCode = normalizeCode(rawCode, currentStandard, cfg.grade);
-            const stdMatchCode = normCode.match(/ท\s*\d\.\d/);
+            const stdMatchCode = normCode.match(/ต\s*\d\.\d/);
             const stdCode = stdMatchCode ? stdMatchCode[0] : currentStandard;
             currentStandard = stdCode;
 
@@ -216,9 +203,9 @@ async function buildThaiPrimary() {
               code: currentItem.code,
               name: fullText,
               type: currentItem.type,
-              subjectArea: 'ภาษาไทย',
+              subjectArea: 'ภาษาต่างประเทศ',
               gradeLevel: cfg.grade,
-              strand: STRAND_MAP[currentItem.std] || 'ภาษาไทย'
+              strand: STRAND_MAP[currentItem.std] || 'ภาษาต่างประเทศ'
             });
           }
         }
@@ -232,26 +219,17 @@ async function buildThaiPrimary() {
     const betweenItems = items.filter(i => i.type === 'BETWEEN');
     const finalItems = items.filter(i => i.type === 'FINAL');
 
-    console.log(`[Thai ${cfg.grade}] Total: ${items.length}/${cfg.targetTotal} (Between: ${betweenItems.length}/${cfg.targetBetween}, Final: ${finalItems.length}/${cfg.targetFinal})`);
-
+    console.log(`[English ${cfg.grade}] Total: ${items.length}/${cfg.targetTotal} (Between: ${betweenItems.length}/${cfg.targetBetween}, Final: ${finalItems.length}/${cfg.targetFinal})`);
     if (items.length !== cfg.targetTotal || betweenItems.length !== cfg.targetBetween || finalItems.length !== cfg.targetFinal) {
-      throw new Error(`Discrepancy in Thai ${cfg.grade}!`);
+      console.log('Items found:');
+      items.forEach(it => console.log(`  ${it.code} [${it.type}] ${it.name.slice(0, 30)}`));
+    } else {
+      const outPath = path.join(__dirname, '..', 'data', cfg.file);
+      items.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
+      fs.writeFileSync(outPath, JSON.stringify(items, null, 2), 'utf-8');
+      console.log(`Successfully written ${cfg.file}!`);
     }
-
-    // Sort items by code naturally
-    items.sort((a, b) => {
-      return a.code.localeCompare(b.code, undefined, { numeric: true });
-    });
-
-    const destPath = path.join(outDir, cfg.file);
-    fs.writeFileSync(destPath, JSON.stringify(items, null, 2), 'utf-8');
-    console.log(`Saved ${items.length} items to ${cfg.file}`);
   }
-
-  console.log('\nAll Thai Primary files generated successfully!');
 }
 
-buildThaiPrimary().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+testEnglishSecondary().catch(console.error);
